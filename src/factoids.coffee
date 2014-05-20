@@ -59,6 +59,8 @@ factoids =
     if fact
       fact.forgotten = true
       "OK, forgot #{key}"
+    else
+      "Not a factoid"
 
   drop: (key) ->
     key = key.toLowerCase()
@@ -99,8 +101,7 @@ module.exports = (robot) ->
     msg.send factoids.set key, value, msg.message.user.name
 
   robot.respond /forget (.{3,})/i, (msg) ->
-    forgot = factoids.forget msg.match[1]
-    msg.reply "Not a factoid" unless forgot
+    msg.reply factoids.forget msg.match[1]
 
   robot.respond /factoids/i, (msg) ->
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
