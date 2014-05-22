@@ -35,14 +35,14 @@ describe 'factoids', ->
 
       @msg.match = ['', 'test', '123']
       @robot.respond.args[0][1](@msg)
-      expect(@msg.send).to.have.been.calledWith('OK sinon, test is now 123')
+      expect(@msg.reply).to.have.been.calledWith('OK, test is now 123')
 
     it 'responds to learn command with substitution', ->
       expect(@robot.respond).to.have.been.calledWith(/learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i)
 
       @msg.match = ['', 'test', '123', '234', 'gi']
       @robot.respond.args[1][1](@msg)
-      expect(@msg.send).to.have.been.calledWith('OK sinon, test is now 234')
+      expect(@msg.reply).to.have.been.calledWith('OK, test is now 234')
 
     it 'responds to forget command', ->
       expect(@robot.respond).to.have.been.calledWith(/forget (.{3,})/i)
@@ -62,11 +62,11 @@ describe 'factoids', ->
 
       @msg.match = ['', 'blah', 'test']
       @robot.respond.args[4][1](@msg)
-      expect(@msg.send).to.have.been.calledWith('OK sinon, aliased blah to test')
+      expect(@msg.reply).to.have.been.calledWith('OK, aliased blah to test')
 
     it 'responds to drop command', ->
       expect(@robot.respond).to.have.been.calledWith(/drop (.{3,})/i)
 
       @msg.match = ['', 'blah']
       @robot.respond.args[5][1](@msg)
-      expect(@msg.send).to.have.been.calledWith('OK, blah has been dropped.')
+      expect(@msg.reply).to.have.been.calledWith('OK, blah has been dropped.')

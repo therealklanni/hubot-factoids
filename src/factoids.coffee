@@ -44,7 +44,7 @@ factoids =
         popularity: 0
 
     factoids.data[key.toLowerCase()] = fact
-    "OK #{who}, #{key} is now #{value}"
+    "OK, #{key} is now #{value}"
 
   get: (key) ->
     fact = factoids.data?[key.toLowerCase()]
@@ -90,7 +90,7 @@ module.exports = (robot) ->
       msg.send "#{to.trim()}: #{fact.value}"
 
   robot.respond /learn (.{3,}) = (.+)/i, (msg) ->
-    msg.send factoids.set msg.match[1], msg.match[2], msg.message.user.name
+    msg.reply factoids.set msg.match[1], msg.match[2], msg.message.user.name
 
   robot.respond /learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) ->
     key = msg.match[1]
@@ -98,7 +98,7 @@ module.exports = (robot) ->
     fact = factoids.get key
     value = fact.value.replace re, msg.match[3]
 
-    msg.send factoids.set key, value, msg.message.user.name
+    msg.reply factoids.set key, value, msg.message.user.name
 
   robot.respond /forget (.{3,})/i, (msg) ->
     msg.reply factoids.forget msg.match[1]
@@ -111,7 +111,7 @@ module.exports = (robot) ->
     who = msg.message.user.name
     alias = msg.match[1]
     target = msg.match[2]
-    msg.send "OK #{who}, aliased #{alias} to #{target}" if factoids.set msg.match[1], "@#{msg.match[2]}", msg.message.user.name
+    msg.reply "OK, aliased #{alias} to #{target}" if factoids.set msg.match[1], "@#{msg.match[2]}", msg.message.user.name
 
   robot.respond /drop (.{3,})/i, (msg) ->
     user = msg.envelope.user
@@ -119,6 +119,6 @@ module.exports = (robot) ->
     if isAdmin or not robot.auth?
       factoid = msg.match[1]
       if factoids.drop factoid
-        msg.send "OK, #{factoid} has been dropped."
+        msg.reply "OK, #{factoid} has been dropped."
       else msg.reply "Not a factoid"
     else msg.reply "You don't have permission to do that."
