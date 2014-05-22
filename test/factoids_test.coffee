@@ -17,6 +17,9 @@ describe 'factoids', ->
     @msg =
       send: sinon.spy()
       reply: sinon.spy()
+      envelope:
+        user:
+          stub: null
       message:
         user:
           name: 'sinon'

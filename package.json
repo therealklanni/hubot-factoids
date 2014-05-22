@@ -1,7 +1,7 @@
 {
   "name": "hubot-factoids",
   "description": "Factoids for Hubot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Kevin Lanni",
     "email": "therealklanni@gmail.com",
