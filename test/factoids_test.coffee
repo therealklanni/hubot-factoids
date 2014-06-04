@@ -31,7 +31,7 @@ describe 'factoids', ->
 
   describe 'registers respond listeners', ->
     it 'responds to learn command', ->
-      expect(@robot.respond).to.have.been.calledWith(/learn (.{3,}) = (.+)/i)
+      expect(@robot.respond).to.have.been.calledWith(/learn (.{3,}) = ([^@].+)/i)
 
       @msg.match = ['', 'test', '123']
       @robot.respond.args[0][1](@msg)
