@@ -46,8 +46,6 @@ module.exports = (robot) ->
 
     if factoid.value?
       msg.reply "OK, #{key} is now #{factoid.value}"
-    else
-      msg.reply 'Not a factoid'
 
   robot.respond /learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) =>
     key = msg.match[1]
