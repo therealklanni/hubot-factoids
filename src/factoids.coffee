@@ -41,7 +41,13 @@ module.exports = (robot) ->
       msg.send "#{to.trim()}: #{fact.value}"
 
   robot.respond /learn (.{3,}) = ([^@].+)/i, (msg) =>
-    msg.reply @factoids.set msg.match[1], msg.match[2], msg.message.user.name
+    [key, value] = [msg.match[1], msg.match[2]]
+    factoid = @factoids.set key, value, msg.message.user.name
+
+    if factoid.value?
+      msg.reply "OK, #{key} is now #{factoid.value}"
+    else
+      msg.reply 'Not a factoid'
 
   robot.respond /learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) =>
     key = msg.match[1]
@@ -49,13 +55,18 @@ module.exports = (robot) ->
     fact = @factoids.get key
     value = fact?.value.replace re, msg.match[3]
 
-    if value?
-      msg.reply @factoids.set key, value, msg.message.user.name
+    factoid = @factoids.set key, value, msg.message.user.name if value?
+
+    if factoid? and factoid.value?
+      msg.reply "OK, #{key} is now #{factoid.value}"
     else
       msg.reply 'Not a factoid'
 
   robot.respond /forget (.{3,})/i, (msg) =>
-    msg.reply @factoids.forget msg.match[1]
+    if @factoids.forget msg.match[1]
+      msg.reply "OK, forgot #{msg.match[1]}"
+    else
+      msg.reply 'Not a factoid'
 
   robot.respond /factoids/i, (msg) =>
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"

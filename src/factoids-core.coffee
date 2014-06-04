@@ -27,7 +27,6 @@ class Factoids
         popularity: 0
 
     @data[key.toLowerCase()] = fact
-    "OK, #{key} is now #{value}"
 
   get: (key, resolveAlias = true) ->
     fact = @data[key.toLowerCase()]
@@ -41,9 +40,6 @@ class Factoids
 
     if fact
       fact.forgotten = true
-      "OK, forgot #{key}"
-    else
-      "Not a factoid"
 
   drop: (key) ->
     key = key.toLowerCase()
