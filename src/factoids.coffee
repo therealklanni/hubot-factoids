@@ -64,7 +64,7 @@ factoids =
 
   drop: (key) ->
     key = key.toLowerCase()
-    if factoids.get key
+    if factoids.get key, false
       delete factoids.data[key]
     else false
 
