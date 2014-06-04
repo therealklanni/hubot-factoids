@@ -96,9 +96,12 @@ module.exports = (robot) ->
     key = msg.match[1]
     re = new RegExp(msg.match[2], msg.match[4])
     fact = factoids.get key
-    value = fact.value.replace re, msg.match[3]
+    value = fact?.value.replace re, msg.match[3]
 
-    msg.reply factoids.set key, value, msg.message.user.name
+    if value?
+      msg.reply factoids.set key, value, msg.message.user.name
+    else
+      msg.reply 'Not a factoid'
 
   robot.respond /forget (.{3,})/i, (msg) ->
     msg.reply factoids.forget msg.match[1]
