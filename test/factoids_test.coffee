@@ -4,69 +4,155 @@ chai.use require 'sinon-chai'
 
 expect = chai.expect
 
+Robot       = require 'hubot/src/robot'
+TextMessage = require('hubot/src/message').TextMessage
+
 describe 'factoids', ->
-  beforeEach ->
-    @robot =
-      hear: sinon.spy()
-      respond: sinon.spy()
-      brain:
-        on: sinon.spy()
-      router:
-        get: sinon.spy()
+  robot = {}
+  user = {}
+  adapter = {}
+  spies = {}
 
-    @msg =
-      send: sinon.spy()
-      reply: sinon.spy()
-      envelope:
-        user:
-          stub: null
-      message:
-        user:
-          name: 'sinon'
+  beforeEach (done) ->
+    # Create new robot, with http, using mock adapter
+    robot = new Robot null, 'mock-adapter', false
 
-    require('../src/factoids')(@robot)
+    robot.adapter.on 'connected', =>
+      spies.hear = sinon.spy(robot, 'hear')
+      spies.respond = sinon.spy(robot, 'respond')
 
-  it 'registers a hear listener', ->
-    expect(@robot.hear).to.have.been.calledWith(/^!([\w\s-]{2,}\w)( @.+)?/i)
+      require('../src/factoids')(robot)
 
-  describe 'registers respond listeners', ->
-    it 'responds to learn command', ->
-      expect(@robot.respond).to.have.been.calledWith(/learn (.{3,}) = ([^@].+)/i)
+      user = robot.brain.userForId '1', {
+        name: 'user'
+        room: '#test'
+      }
 
-      @msg.match = ['', 'test', '123']
-      @robot.respond.args[0][1](@msg)
-      expect(@msg.reply).to.have.been.calledWith('OK, test is now 123')
+      adapter = robot.adapter
 
-    it 'responds to learn command with substitution', ->
-      expect(@robot.respond).to.have.been.calledWith(/learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i)
+    robot.run()
 
-      @msg.match = ['', 'test', '123', '234', 'gi']
-      @robot.respond.args[1][1](@msg)
-      expect(@msg.reply).to.have.been.calledWith('OK, test is now 234')
+    done()
 
-    it 'responds to forget command', ->
-      expect(@robot.respond).to.have.been.calledWith(/forget (.{3,})/i)
+  afterEach ->
+    robot.shutdown()
 
-      @msg.match = ['', 'test']
-      @robot.respond.args[2][1](@msg)
-      expect(@msg.reply).to.have.been.calledWith('OK, forgot test')
+  describe 'listeners', ->
+    it 'registered hear !factoid', ->
+      expect(spies.hear).to.have.been.calledWith(/^!([\w\s-]{2,}\w)( @.+)?/i)
 
-    it 'responds to factoids command', ->
-      expect(@robot.respond).to.have.been.calledWith(/factoids/i)
+    it 'registered respond learn', ->
+      expect(spies.respond).to.have.been.calledWith(/learn (.{3,}) = ([^@].+)/i)
 
-      @robot.respond.args[3][1](@msg)
-      expect(@msg.reply).to.have.been.calledWith('http://not-yet-set/hubot/factoids')
+    it 'registered respond learn substitution', ->
+      expect(spies.respond).to.have.been.calledWith(/learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i)
 
-    it 'responds to alias command', ->
-      expect(@robot.respond).to.have.been.calledWith(/alias (.{3,}) = (.{3,})/i)
+    it 'registered respond forget', ->
+      expect(spies.respond).to.have.been.calledWith(/forget (.{3,})/i)
 
-      @msg.match = ['', 'blah', 'test']
-      @robot.respond.args[4][1](@msg)
-      expect(@msg.reply).to.have.been.calledWith('OK, aliased blah to test')
+    it 'registered respond factoids', ->
+      expect(spies.respond).to.have.been.calledWith(/factoids/i)
 
-    it 'responds to drop command', ->
-      expect(@robot.respond).to.have.been.calledWith(/drop (.{3,})/i)
+    it 'registered respond alias', ->
+      expect(spies.respond).to.have.been.calledWith(/alias (.{3,}) = (.{3,})/i)
 
-      @msg.match = ['', 'blah']
-      @robot.respond.args[5][1](@msg)
-      expect(@msg.reply).to.have.been.calledWith('OK, blah has been dropped.')
+    it 'registered respond drop', ->
+      expect(spies.respond).to.have.been.calledWith(/drop (.{3,})/i)
+
+  it 'responds to learn', (done) ->
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /OK, foo is now bar/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+  it 'responds to !factoid', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+    adapter.on 'send', (envelope, strings) ->
+      expect(strings[0]).to.match /user: bar/
+      done()
+
+    adapter.receive(new TextMessage user, '!foo')
+
+  it 'responds to !factoid @mention', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+    adapter.on 'send', (envelope, strings) ->
+      expect(strings[0]).to.match /@user2: bar/
+      done()
+
+    adapter.receive(new TextMessage user, '!foo @user2')
+
+  it 'responds to learn substitution', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /OK, foo is now qux/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: learn foo =~ s/bar/qux/i')
+
+  it 'responds to forget', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /OK, forgot foo/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: forget foo')
+
+  it 'responds to factoids', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /http:\/\/not-yet-set\/hubot\/factoids/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: factoids')
+
+  it 'responds to alias', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /OK, aliased baz to foo/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: alias baz = foo')
+
+  it 'responds to drop', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /OK, foo has been dropped/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: drop foo')
+
+  it 'responds to invalid !factoid', (done) ->
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /Not a factoid/
+      done()
+
+    adapter.receive(new TextMessage user, '!foo')
+
+  it 'responds to invalid learn substitution', (done) ->
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /Not a factoid/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: learn foo =~ s/bar/baz/gi')
+
+  it 'responds to invalid forget', (done) ->
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /Not a factoid/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: forget foo')
+
+  it 'responds to invalid drop', (done) ->
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /Not a factoid/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: drop foo')
