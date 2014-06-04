@@ -21,66 +21,17 @@
 # Author:
 #   therealklanni
 
-factoids =
-  set: (key, value, who, resolveAlias) ->
-    key = key.trim()
-    value = value.trim()
-    fact = factoids.get key, resolveAlias
-
-    if typeof fact is 'object'
-      fact.history ?= []
-      hist =
-        date: Date()
-        editor: who
-        oldValue: fact.value
-        newValue: value
-
-      fact.history.push hist
-      fact.value = value
-      if fact.forgotten? then fact.forgotten = false
-    else
-      fact =
-        value: value
-        popularity: 0
-
-    factoids.data[key.toLowerCase()] = fact
-    "OK, #{key} is now #{value}"
-
-  get: (key, resolveAlias = true) ->
-    fact = factoids.data?[key.toLowerCase()]
-    alias = fact?.value?.match /^@([^@].+)$/i
-    if resolveAlias and alias?
-      fact = factoids.get alias[1]
-    fact
-
-  forget: (key) ->
-    fact = factoids.get key
-
-    if fact
-      fact.forgotten = true
-      "OK, forgot #{key}"
-    else
-      "Not a factoid"
-
-  drop: (key) ->
-    key = key.toLowerCase()
-    if factoids.get key, false
-      delete factoids.data[key]
-    else false
+Factoids = require './factoids-core'
 
 module.exports = (robot) ->
-  factoids.data ?= {}
-
-  robot.brain.on "loaded", ->
-    factoids.data = robot.brain.data.betterFactoids ?= {}
-
-  robot.router.get "/hubot/factoids", (req, res) ->
-    res.end JSON.stringify factoids.data, null, 2
+  @factoids = new Factoids robot
+  robot.router.get "/hubot/factoids", (req, res) =>
+    res.end JSON.stringify @factoids.data, null, 2
 
   blip = '!' unless process.env.HUBOT_FACTOID_PREFIX
 
-  robot.hear new RegExp("^#{blip}([\\w\\s-]{2,}\\w)( @.+)?", 'i'), (msg) ->
-    fact = factoids.get msg.match[1]
+  robot.hear new RegExp("^#{blip}([\\w\\s-]{2,}\\w)( @.+)?", 'i'), (msg) =>
+    fact = @factoids.get msg.match[1]
     to = msg.match[2]
     if not fact? or fact.forgotten
       msg.reply "Not a factoid"
@@ -89,39 +40,39 @@ module.exports = (robot) ->
       to ?= msg.message.user.name
       msg.send "#{to.trim()}: #{fact.value}"
 
-  robot.respond /learn (.{3,}) = ([^@].+)/i, (msg) ->
-    msg.reply factoids.set msg.match[1], msg.match[2], msg.message.user.name
+  robot.respond /learn (.{3,}) = ([^@].+)/i, (msg) =>
+    msg.reply @factoids.set msg.match[1], msg.match[2], msg.message.user.name
 
-  robot.respond /learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) ->
+  robot.respond /learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) =>
     key = msg.match[1]
     re = new RegExp(msg.match[2], msg.match[4])
-    fact = factoids.get key
+    fact = @factoids.get key
     value = fact?.value.replace re, msg.match[3]
 
     if value?
-      msg.reply factoids.set key, value, msg.message.user.name
+      msg.reply @factoids.set key, value, msg.message.user.name
     else
       msg.reply 'Not a factoid'
 
-  robot.respond /forget (.{3,})/i, (msg) ->
-    msg.reply factoids.forget msg.match[1]
+  robot.respond /forget (.{3,})/i, (msg) =>
+    msg.reply @factoids.forget msg.match[1]
 
-  robot.respond /factoids/i, (msg) ->
+  robot.respond /factoids/i, (msg) =>
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
     msg.reply "#{url.replace /\/$/, ''}/hubot/factoids"
 
-  robot.respond /alias (.{3,}) = (.{3,})/i, (msg) ->
+  robot.respond /alias (.{3,}) = (.{3,})/i, (msg) =>
     who = msg.message.user.name
     alias = msg.match[1]
     target = msg.match[2]
-    msg.reply "OK, aliased #{alias} to #{target}" if factoids.set msg.match[1], "@#{msg.match[2]}", msg.message.user.name, false
+    msg.reply "OK, aliased #{alias} to #{target}" if @factoids.set msg.match[1], "@#{msg.match[2]}", msg.message.user.name, false
 
-  robot.respond /drop (.{3,})/i, (msg) ->
+  robot.respond /drop (.{3,})/i, (msg) =>
     user = msg.envelope.user
     isAdmin = robot.auth?.hasRole(user, 'factoids-admin') or robot.auth?.hasRole(user, 'admin')
     if isAdmin or not robot.auth?
       factoid = msg.match[1]
-      if factoids.drop factoid
-        msg.reply "OK, #{factoid} has been dropped."
+      if @factoids.drop factoid
+        msg.reply "OK, #{factoid} has been dropped"
       else msg.reply "Not a factoid"
     else msg.reply "You don't have permission to do that."
