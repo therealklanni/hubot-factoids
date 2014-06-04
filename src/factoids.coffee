@@ -22,10 +22,10 @@
 #   therealklanni
 
 factoids =
-  set: (key, value, who) ->
+  set: (key, value, who, resolveAlias) ->
     key = key.trim()
     value = value.trim()
-    fact = factoids.get key
+    fact = factoids.get key, resolveAlias
 
     if typeof fact is 'object'
       fact.history ?= []
@@ -46,10 +46,10 @@ factoids =
     factoids.data[key.toLowerCase()] = fact
     "OK, #{key} is now #{value}"
 
-  get: (key) ->
+  get: (key, resolveAlias = true) ->
     fact = factoids.data?[key.toLowerCase()]
     alias = fact?.value?.match /^@([^@].+)$/i
-    if alias?
+    if resolveAlias and alias?
       fact = factoids.get alias[1]
     fact
 
@@ -89,7 +89,7 @@ module.exports = (robot) ->
       to ?= msg.message.user.name
       msg.send "#{to.trim()}: #{fact.value}"
 
-  robot.respond /learn (.{3,}) = (.+)/i, (msg) ->
+  robot.respond /learn (.{3,}) = ([^@].+)/i, (msg) ->
     msg.reply factoids.set msg.match[1], msg.match[2], msg.message.user.name
 
   robot.respond /learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) ->
@@ -111,7 +111,7 @@ module.exports = (robot) ->
     who = msg.message.user.name
     alias = msg.match[1]
     target = msg.match[2]
-    msg.reply "OK, aliased #{alias} to #{target}" if factoids.set msg.match[1], "@#{msg.match[2]}", msg.message.user.name
+    msg.reply "OK, aliased #{alias} to #{target}" if factoids.set msg.match[1], "@#{msg.match[2]}", msg.message.user.name, false
 
   robot.respond /drop (.{3,})/i, (msg) ->
     user = msg.envelope.user
