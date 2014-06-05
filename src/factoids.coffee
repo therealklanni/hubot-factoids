@@ -66,6 +66,13 @@ module.exports = (robot) ->
     else
       msg.reply 'Not a factoid'
 
+  robot.respond /remember (.{3,})/i, (msg) =>
+    factoid = @factoids.remember msg.match[1]
+    if factoid? and not factoid.forgotten
+      msg.reply "OK, #{msg.match[1]} is #{factoid.value}"
+    else
+      msg.reply 'Not a factoid'
+
   robot.respond /factoids/i, (msg) =>
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
     msg.reply "#{url.replace /\/$/, ''}/hubot/factoids"

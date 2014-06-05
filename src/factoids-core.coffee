@@ -41,6 +41,14 @@ class Factoids
     if fact
       fact.forgotten = true
 
+  remember: (key) ->
+    fact = @get key
+
+    if fact
+      fact.forgotten = false
+
+    fact
+
   drop: (key) ->
     key = key.toLowerCase()
     if @get key, false
