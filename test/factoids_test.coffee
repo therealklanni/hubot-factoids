@@ -50,6 +50,9 @@ describe 'factoids', ->
     it 'registered respond forget', ->
       expect(spies.respond).to.have.been.calledWith(/forget (.{3,})/i)
 
+    it 'registered respond remember', ->
+      expect(spies.respond).to.have.been.calledWith(/remember (.{3,})/i)
+
     it 'registered respond factoids', ->
       expect(spies.respond).to.have.been.calledWith(/factoids/i)
 
@@ -101,6 +104,16 @@ describe 'factoids', ->
       done()
 
     adapter.receive(new TextMessage user, 'hubot: forget foo')
+
+  it 'responds to remember', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+    adapter.receive(new TextMessage user, 'hubot: forget foo')
+
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /OK, foo is bar/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: remember foo')
 
   it 'responds to factoids', (done) ->
     adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
