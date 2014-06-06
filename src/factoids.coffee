@@ -25,7 +25,7 @@ Factoids = require './factoids-core'
 
 module.exports = (robot) ->
   @factoids = new Factoids robot
-  robot.router.get "/hubot/factoids", (req, res) =>
+  robot.router.get "/#{robot.name}/factoids", (req, res) =>
     res.end JSON.stringify @factoids.data, null, 2
 
   blip = '!' unless process.env.HUBOT_FACTOID_PREFIX
