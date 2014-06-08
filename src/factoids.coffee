@@ -73,9 +73,9 @@ module.exports = (robot) ->
     else
       msg.reply 'Not a factoid'
 
-  robot.respond /factoids/i, (msg) =>
+  robot.respond /factoids?/i, (msg) =>
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
-    msg.reply "#{url.replace /\/$/, ''}/hubot/factoids"
+    msg.reply "#{url.replace /\/$/, ''}/#{robot.name}/factoids"
 
   robot.respond /alias (.{3,}) = (.{3,})/i, (msg) =>
     who = msg.message.user.name
