@@ -56,6 +56,9 @@ describe 'factoids', ->
     it 'registered respond factoids', ->
       expect(spies.respond).to.have.been.calledWith(/factoids?/i)
 
+    it 'registered respond search', ->
+      expect(spies.respond).to.have.been.calledWith(/search (.{3,})/i)
+
     it 'registered respond alias', ->
       expect(spies.respond).to.have.been.calledWith(/alias (.{3,}) = (.{3,})/i)
 
@@ -121,6 +124,21 @@ describe 'factoids', ->
       done()
 
     adapter.receive(new TextMessage user, 'hubot: factoids')
+
+  it 'responds to search', (done) ->
+    adapter.receive(new TextMessage user, 'hubot: learn foobar = baz')
+    adapter.receive(new TextMessage user, 'hubot: learn barbaz = foo')
+    adapter.receive(new TextMessage user, 'hubot: learn qix = bar')
+    adapter.receive(new TextMessage user, 'hubot: learn qux = baz')
+
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /.* the following factoids: .*!foobar/
+      expect(strings[0]).to.match /.* the following factoids: .*!barbaz/
+      expect(strings[0]).to.match /.* the following factoids: .*!qix/
+      expect(strings[0]).not.to.match /.* the following factoids: .*!qux/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: search bar')
 
   it 'responds to alias', (done) ->
     adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
