@@ -54,7 +54,7 @@ describe 'factoids', ->
       expect(spies.respond).to.have.been.calledWith(/remember (.{3,})/i)
 
     it 'registered respond factoids', ->
-      expect(spies.respond).to.have.been.calledWith(/factoids/i)
+      expect(spies.respond).to.have.been.calledWith(/factoids?/i)
 
     it 'registered respond alias', ->
       expect(spies.respond).to.have.been.calledWith(/alias (.{3,}) = (.{3,})/i)
@@ -116,10 +116,8 @@ describe 'factoids', ->
     adapter.receive(new TextMessage user, 'hubot: remember foo')
 
   it 'responds to factoids', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
-
     adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /http:\/\/not-yet-set\/hubot\/factoids/
+      expect(strings[0]).to.match /http:\/\/not-yet-set\/.*\/factoids/
       done()
 
     adapter.receive(new TextMessage user, 'hubot: factoids')
