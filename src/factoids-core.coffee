@@ -35,6 +35,13 @@ class Factoids
       fact = @get alias[1]
     fact
 
+  search: (str) ->
+    keys = Object.keys @data
+
+    keys.filter (a) =>
+      value = @data[a].value
+      value.indexOf(str) > -1 || a.indexOf(str) > -1
+
   forget: (key) ->
     fact = @get key
 

@@ -77,6 +77,14 @@ module.exports = (robot) ->
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
     msg.reply "#{url.replace /\/$/, ''}/#{robot.name}/factoids"
 
+  robot.respond /search (.{3,})/i, (msg) =>
+    factoids = @factoids.search msg.match[1]
+
+    if factoids.length > 0
+      msg.reply "Matched the following factoids: *!#{factoids.join '*, *!'}*"
+    else
+      msg.reply 'No factoids matched'
+
   robot.respond /alias (.{3,}) = (.{3,})/i, (msg) =>
     who = msg.message.user.name
     alias = msg.match[1]
