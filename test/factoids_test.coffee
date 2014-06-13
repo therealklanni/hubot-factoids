@@ -39,7 +39,7 @@ describe 'factoids', ->
 
   describe 'listeners', ->
     it 'registered hear !factoid', ->
-      expect(spies.hear).to.have.been.calledWith(/^!([\w\s-]{2,}\w)( @.+)?/i)
+      expect(spies.hear).to.have.been.calledWith(/^[!]([\w\s-]{2,}\w)( @.+)?/i)
 
     it 'registered respond learn', ->
       expect(spies.respond).to.have.been.calledWith(/learn (.{3,}) = ([^@].+)/i)
@@ -185,3 +185,37 @@ describe 'factoids', ->
       done()
 
     adapter.receive(new TextMessage user, 'hubot: drop foo')
+
+describe 'factoids customization', ->
+  robot = {}
+  user = {}
+  adapter = {}
+  spies = {}
+
+  beforeEach (done) ->
+    process.env.HUBOT_FACTOID_PREFIX = '?'
+    # Create new robot, with http, using mock adapter
+    robot = new Robot null, 'mock-adapter', false
+
+    robot.adapter.on 'connected', =>
+      spies.hear = sinon.spy(robot, 'hear')
+      spies.respond = sinon.spy(robot, 'respond')
+
+      require('../src/factoids')(robot)
+
+      user = robot.brain.userForId '1', {
+        name: 'user'
+        room: '#test'
+      }
+
+      adapter = robot.adapter
+
+    robot.run()
+
+    done()
+
+  afterEach ->
+    robot.shutdown()
+
+  it 'can override prefix', ->
+    expect(spies.hear).to.have.been.calledWith(/^[?]([\w\s-]{2,}\w)( @.+)?/i)
