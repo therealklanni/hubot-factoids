@@ -28,9 +28,9 @@ module.exports = (robot) ->
   robot.router.get "/#{robot.name}/factoids", (req, res) =>
     res.end JSON.stringify @factoids.data, null, 2
 
-  blip = '!' unless process.env.HUBOT_FACTOID_PREFIX
+  blip = process.env.HUBOT_FACTOID_PREFIX or '!'
 
-  robot.hear new RegExp("^#{blip}([\\w\\s-]{2,}\\w)( @.+)?", 'i'), (msg) =>
+  robot.hear new RegExp("^[#{blip}]([\\w\\s-]{2,}\\w)( @.+)?", 'i'), (msg) =>
     fact = @factoids.get msg.match[1]
     to = msg.match[2]
     if not fact? or fact.forgotten
