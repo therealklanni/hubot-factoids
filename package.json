@@ -1,7 +1,7 @@
 {
   "name": "hubot-factoids",
   "description": "Factoids for Hubot",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": {
     "name": "Kevin Lanni",
     "email": "therealklanni@gmail.com",
@@ -15,10 +15,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/therealklanni/hubot-factoids.git"
+    "url": "git://github.com/hubot-scripts/hubot-factoids.git"
   },
   "bugs": {
-    "url": "https://github.com/therealklanni/hubot-factoids/issues"
+    "url": "https://github.com/hubot-scripts/hubot-factoids/issues"
   },
   "dependencies": {
     "coffee-script": "~1.6"

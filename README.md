@@ -2,7 +2,7 @@
 
 A factoids implementation for Hubot, inspired by [oftn-bot](https://github.com/oftn/oftn-bot).
 
-[![Build Status](https://travis-ci.org/therealklanni/hubot-factoids.svg)](https://travis-ci.org/therealklanni/hubot-factoids)
+[![Build Status](https://travis-ci.org/hubot-scripts/hubot-factoids.svg)](https://travis-ci.org/hubot-scripts/hubot-factoids)
 
 ## Features
 
