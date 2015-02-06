@@ -15,6 +15,8 @@
 #   hubot learn <factoid> =~ s/expression/replace/gi - edit a factoid
 #   hubot alias <factoid> = <factoid>
 #   hubot forget <factoid> - forget a factoid
+#   hubot remember <factoid> - remember a factoid
+#   hubot drop <factoid> - permanently forget a factoid
 #   hubot factoids - get a link to the raw factoid data
 #   !<factoid> - play back a factoid
 #
