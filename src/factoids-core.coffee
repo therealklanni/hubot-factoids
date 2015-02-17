@@ -1,6 +1,7 @@
 class Factoids
   constructor: (@robot) ->
-    @data ?= {}
+    if @robot.brain?.data?
+      @data = @robot.brain.data.factoids ?= {}
 
     @robot.brain.on 'loaded', =>
       @data = @robot.brain.data.factoids ?= {}
