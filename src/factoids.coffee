@@ -83,7 +83,8 @@ module.exports = (robot) ->
     factoids = @factoids.search msg.match[1]
 
     if factoids.length > 0
-      msg.reply "Matched the following factoids: *!#{factoids.join '*, *!'}*"
+      found = prefix + factoids.join("*, *#{prefix}")
+      msg.reply "Matched the following factoids: *#{found}*"
     else
       msg.reply 'No factoids matched'
 
