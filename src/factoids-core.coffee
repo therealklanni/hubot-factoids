@@ -1,3 +1,6 @@
+# Description:
+#   Provides important functions used by the main Factoids code.
+
 class Factoids
   constructor: (@robot) ->
     if @robot.brain?.data?
