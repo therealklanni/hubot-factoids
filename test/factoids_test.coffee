@@ -65,58 +65,84 @@ describe 'factoids', ->
     it 'registered respond drop', ->
       expect(spies.respond).to.have.been.calledWith(/drop (.{3,})/i)
 
-  it 'responds to learn', (done) ->
-    adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /OK, foo is now bar/
-      done()
+  describe 'new factoids', ->
+    it 'responds to learn', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /OK, foo is now bar/
+        done()
 
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+      adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
 
-  it 'responds to !factoid', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+  describe 'existing factoids', ->
+    beforeEach ->
+      robot.brain.data.factoids.foo = value: 'bar'
+      robot.brain.data.factoids.foobar = value: 'baz'
+      robot.brain.data.factoids.barbaz = value: 'foo'
+      robot.brain.data.factoids.qix = value: 'bar'
+      robot.brain.data.factoids.qux = value: 'baz'
 
-    adapter.on 'send', (envelope, strings) ->
-      expect(strings[0]).to.match /user: bar/
-      done()
+    it 'responds to !factoid', (done) ->
+      adapter.on 'send', (envelope, strings) ->
+        expect(strings[0]).to.match /user: bar/
+        done()
 
-    adapter.receive(new TextMessage user, '!foo')
+      adapter.receive(new TextMessage user, '!foo')
 
-  it 'responds to !factoid @mention', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+    it 'responds to !factoid @mention', (done) ->
+      adapter.on 'send', (envelope, strings) ->
+        expect(strings[0]).to.match /@user2: bar/
+        done()
 
-    adapter.on 'send', (envelope, strings) ->
-      expect(strings[0]).to.match /@user2: bar/
-      done()
+      adapter.receive(new TextMessage user, '!foo @user2')
 
-    adapter.receive(new TextMessage user, '!foo @user2')
+    it 'responds to learn substitution', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /OK, foo is now qux/
+        done()
 
-  it 'responds to learn substitution', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+      adapter.receive(new TextMessage user, 'hubot: learn foo =~ s/bar/qux/i')
 
-    adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /OK, foo is now qux/
-      done()
+    it 'responds to forget', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /OK, forgot foo/
+        done()
 
-    adapter.receive(new TextMessage user, 'hubot: learn foo =~ s/bar/qux/i')
+      adapter.receive(new TextMessage user, 'hubot: forget foo')
 
-  it 'responds to forget', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
+    it 'responds to search', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /.* the following factoids: .*!foobar/
+        expect(strings[0]).to.match /.* the following factoids: .*!barbaz/
+        expect(strings[0]).to.match /.* the following factoids: .*!qix/
+        expect(strings[0]).not.to.match /.* the following factoids: .*!qux/
+        done()
 
-    adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /OK, forgot foo/
-      done()
+      adapter.receive(new TextMessage user, 'hubot: search bar')
 
-    adapter.receive(new TextMessage user, 'hubot: forget foo')
+    it 'responds to alias', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /OK, aliased baz to foo/
+        done()
 
-  it 'responds to remember', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
-    adapter.receive(new TextMessage user, 'hubot: forget foo')
+      adapter.receive(new TextMessage user, 'hubot: alias baz = foo')
 
-    adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /OK, foo is bar/
-      done()
+    it 'responds to drop', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /OK, foo has been dropped/
+        done()
 
-    adapter.receive(new TextMessage user, 'hubot: remember foo')
+      adapter.receive(new TextMessage user, 'hubot: drop foo')
+
+  describe 'forgotten factoids', ->
+    beforeEach ->
+      robot.brain.data.factoids.foo = value: 'bar', forgotten: true
+
+    it 'responds to remember', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /OK, foo is bar/
+        done()
+
+      adapter.receive(new TextMessage user, 'hubot: remember foo')
 
   it 'responds to factoids', (done) ->
     adapter.on 'reply', (envelope, strings) ->
@@ -124,39 +150,6 @@ describe 'factoids', ->
       done()
 
     adapter.receive(new TextMessage user, 'hubot: factoids')
-
-  it 'responds to search', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foobar = baz')
-    adapter.receive(new TextMessage user, 'hubot: learn barbaz = foo')
-    adapter.receive(new TextMessage user, 'hubot: learn qix = bar')
-    adapter.receive(new TextMessage user, 'hubot: learn qux = baz')
-
-    adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /.* the following factoids: .*!foobar/
-      expect(strings[0]).to.match /.* the following factoids: .*!barbaz/
-      expect(strings[0]).to.match /.* the following factoids: .*!qix/
-      expect(strings[0]).not.to.match /.* the following factoids: .*!qux/
-      done()
-
-    adapter.receive(new TextMessage user, 'hubot: search bar')
-
-  it 'responds to alias', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
-
-    adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /OK, aliased baz to foo/
-      done()
-
-    adapter.receive(new TextMessage user, 'hubot: alias baz = foo')
-
-  it 'responds to drop', (done) ->
-    adapter.receive(new TextMessage user, 'hubot: learn foo = bar')
-
-    adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /OK, foo has been dropped/
-      done()
-
-    adapter.receive(new TextMessage user, 'hubot: drop foo')
 
   it 'responds to invalid !factoid', (done) ->
     adapter.on 'reply', (envelope, strings) ->
