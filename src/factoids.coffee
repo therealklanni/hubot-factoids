@@ -18,6 +18,7 @@
 #   hubot remember <factoid> - remember a factoid
 #   hubot drop <factoid> - permanently forget a factoid
 #   hubot factoids - get a link to the raw factoid data
+#   hubot search <substring> - list factoids which match (by factoid key or result)
 #   !<factoid> - play back a factoid
 #
 # Author:
