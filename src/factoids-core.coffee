@@ -39,6 +39,13 @@ class Factoids
       fact = @get alias[1]
     fact
 
+  getAll: () ->
+    values = {}
+    for i of @data
+      values[i] = @data[i].value
+
+    values
+
   search: (str) ->
     keys = Object.keys @data
 
