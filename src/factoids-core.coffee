@@ -42,7 +42,8 @@ class Factoids
   getAll: () ->
     values = {}
     for i of @data
-      values[i] = @data[i].value
+      if !@data[i].forgotten
+        values[i] = @data[i].value
 
     values
 

@@ -77,12 +77,15 @@ module.exports = (robot) ->
       msg.reply 'Not a factoid'
 
   robot.respond /factoids?/i, (msg) =>
-    factoids = @factoids.getAll()
+    all = @factoids.getAll()
     out = ''
 
-    for f of factoids
-      out += prefix + f + ': ' + factoids[f] + "\n"
-    msg.reply "All factoids: \n" + out
+    if not all? or Object.keys(all).length is 0
+      msg.reply "No factoids defined"
+    else
+      for f of all
+        out += prefix + f + ': ' + all[f] + "\n"
+      msg.reply "All factoids: \n" + out
 
   robot.respond /search (.{3,})/i, (msg) =>
     factoids = @factoids.search msg.match[1]

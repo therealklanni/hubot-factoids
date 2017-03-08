@@ -136,6 +136,7 @@ describe 'factoids', ->
   describe 'forgotten factoids', ->
     beforeEach ->
       robot.brain.data.factoids.foo = value: 'bar', forgotten: true
+      robot.brain.data.factoids.bas = value: 'baz', forgotten: false
 
     it 'responds to remember', (done) ->
       adapter.on 'reply', (envelope, strings) ->
@@ -144,9 +145,21 @@ describe 'factoids', ->
 
       adapter.receive(new TextMessage user, 'hubot: remember foo')
 
+  describe 'get all', ->
+    beforeEach ->
+      robot.brain.data.factoids.foo = value: 'bar', forgotten: true
+      robot.brain.data.factoids.bas = value: 'baz', forgotten: false
+
+    it 'responds to factoids', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /All factoids: \n!bas: baz\n/
+        done()
+
+      adapter.receive(new TextMessage user, 'hubot: factoids')
+
   it 'responds to factoids', (done) ->
     adapter.on 'reply', (envelope, strings) ->
-      expect(strings[0]).to.match /http:\/\/not-yet-set\/.*\/factoids/
+      expect(strings[0]).to.match /No factoids defined/
       done()
 
     adapter.receive(new TextMessage user, 'hubot: factoids')
