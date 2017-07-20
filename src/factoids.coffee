@@ -76,7 +76,7 @@ module.exports = (robot) ->
     else
       msg.reply 'Not a factoid'
 
-  robot.respond /list all factoids$/i, (msg) =>
+  robot.respond /list all factoids/i, (msg) =>
     all = @factoids.getAll()
     out = ''
 

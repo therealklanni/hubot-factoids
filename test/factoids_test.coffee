@@ -155,14 +155,14 @@ describe 'factoids', ->
         expect(strings[0]).to.match /All factoids: \n!bas: baz\n/
         done()
 
-      adapter.receive(new TextMessage user, 'hubot: factoids')
+      adapter.receive(new TextMessage user, 'hubot: list all factoids')
 
   it 'responds to list all factoids', (done) ->
     adapter.on 'reply', (envelope, strings) ->
       expect(strings[0]).to.match /No factoids defined/
       done()
 
-    adapter.receive(new TextMessage user, 'hubot: factoids')
+    adapter.receive(new TextMessage user, 'hubot: list all factoids')
 
   it 'responds to invalid !factoid', (done) ->
     adapter.on 'reply', (envelope, strings) ->
