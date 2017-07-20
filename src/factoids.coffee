@@ -44,6 +44,14 @@ module.exports = (robot) ->
       to ?= msg.message.user.name
       msg.send "#{to.trim()}: #{fact.value}"
 
+  robot.respond new RegExp("[#{prefix}]([\\w\\s-]{2,}\\w)", 'i'), (msg) =>
+    fact = @factoids.get msg.match[1]
+    if not fact? or fact.forgotten
+      msg.reply "Not a factoid"
+    else
+      fact.popularity++
+      msg.send "#{fact.value}"
+
   robot.respond /learn (.{3,}) = ([^@].+)/i, (msg) =>
     [key, value] = [msg.match[1], msg.match[2]]
     factoid = @factoids.set key, value, msg.message.user.name
