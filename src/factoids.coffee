@@ -76,11 +76,7 @@ module.exports = (robot) ->
     else
       msg.reply 'Not a factoid'
 
-  robot.respond /factoids?/i, (msg) =>
-    url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
-    msg.reply "#{url.replace /\/$/, ''}/#{robot.name}/factoids"
-
-  robot.respond /list all factoids?/i, (msg) =>
+  robot.respond /list all factoids$/i, (msg) =>
     all = @factoids.getAll()
     out = ''
 
@@ -90,6 +86,10 @@ module.exports = (robot) ->
       for f of all
         out += prefix + f + ': ' + all[f] + "\n"
       msg.reply "All factoids: \n" + out
+
+  robot.respond /factoids?/i, (msg) =>
+    url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
+    msg.reply "#{url.replace /\/$/, ''}/#{robot.name}/factoids"
 
   robot.respond /search (.{3,})/i, (msg) =>
     factoids = @factoids.search msg.match[1]
