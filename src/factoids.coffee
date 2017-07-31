@@ -18,6 +18,7 @@
 #   hubot remember <factoid> - remember a factoid
 #   hubot drop <factoid> - permanently forget a factoid
 #   hubot factoids - get a link to the raw factoid data
+#   hubot list all factoids - list all factoids
 #   hubot search <substring> - list factoids which match (by factoid key or result)
 #   !<factoid> - play back a factoid
 #
@@ -83,6 +84,17 @@ module.exports = (robot) ->
       msg.reply "OK, #{msg.match[1]} is #{factoid.value}"
     else
       msg.reply 'Not a factoid'
+
+  robot.respond /list all factoids/i, (msg) =>
+    all = @factoids.getAll()
+    out = ''
+
+    if not all? or Object.keys(all).length is 0
+      msg.reply "No factoids defined"
+    else
+      for f of all
+        out += prefix + f + ': ' + all[f] + "\n"
+      msg.reply "All factoids: \n" + out
 
   robot.respond /factoids?/i, (msg) =>
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"

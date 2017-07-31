@@ -151,6 +151,25 @@ describe 'factoids', ->
 
     adapter.receive(new TextMessage user, 'hubot: factoids')
 
+  describe 'list all factoids', ->
+    beforeEach ->
+      robot.brain.data.factoids.foo = value: 'bar', forgotten: true
+      robot.brain.data.factoids.bas = value: 'baz', forgotten: false
+
+    it 'responds to list all factoids', (done) ->
+      adapter.on 'reply', (envelope, strings) ->
+        expect(strings[0]).to.match /All factoids: \n!bas: baz\n/
+        done()
+
+      adapter.receive(new TextMessage user, 'hubot: list all factoids')
+
+  it 'responds to list all factoids, empty list', (done) ->
+    adapter.on 'reply', (envelope, strings) ->
+      expect(strings[0]).to.match /No factoids defined/
+      done()
+
+    adapter.receive(new TextMessage user, 'hubot: list all factoids')
+
   it 'responds to invalid !factoid', (done) ->
     adapter.on 'reply', (envelope, strings) ->
       expect(strings[0]).to.match /Not a factoid/
