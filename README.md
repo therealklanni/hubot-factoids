@@ -39,34 +39,34 @@ of all past values along with who updated the value and when.
 (these reserved characters delimit the factoid and its value), although special
 characters should be avoided.
 
-`hubot: learn <factoid> = <details>`
+`hubot: factoid learn <factoid> = <details>`
 
 ### Inline editing a factoid
 
 If you prefer, you can edit a factoid value inline, using a sed-like substitution
 expression.
 
-`hubot: learn <factoid> =~ s/expression/replace/gi`
+`hubot: factoid learn <factoid> =~ s/expression/replace/gi`
 
-`hubot: learn <factoid> =~ s/expression/replace/i`
+`hubot: factoid learn <factoid> =~ s/expression/replace/i`
 
-`hubot: learn <factoid> =~ s/expression/replace/g`
+`hubot: factoid learn <factoid> =~ s/expression/replace/g`
 
-`hubot: learn <factoid> =~ s/expression/replace/`
+`hubot: factoid learn <factoid> =~ s/expression/replace/`
 
 ### Set an alias
 
 An alias will point to the specified pre-existing factoid and when invoked will
 return that factoid's value.
 
-`hubot: alias <factoid> = <factoid>`
+`hubot: factoid alias <factoid> = <factoid>`
 
 ### Forget a factoid
 
 Disables responding to a factoid. The factoid is not deleted from memory, and
 can be re-enabled by setting a new value (its complete history is retained).
 
-`hubot: forget <factoid>`
+`hubot: factoid forget <factoid>`
 
 ### Get URL to factoid data
 
@@ -95,7 +95,7 @@ Hubot will respond accordingly:
 Find a factoid containing the given string. The string can be matched in either
 the factoid key or value.
 
-`hubot: search foobar`
+`hubot: factoid search foobar`
 
 
 ### Drop a factoid
@@ -105,4 +105,4 @@ If [hubot-auth](https://github.com/hubot-scripts/hubot-auth) script is loaded,
 "admin" or "factoids-admin" role is required to perform this action. It's
 recommended you use the `forget` command instead of `drop`.
 
-`hubot: drop <factoid>`
+`hubot: factoid drop <factoid>`

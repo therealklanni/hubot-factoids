@@ -11,15 +11,15 @@
 #   HUBOT_BASE_URL - URL of Hubot (ex. http://myhubothost.com:5555/)
 #
 # Commands:
-#   hubot learn <factoid> = <details> - learn a new factoid
-#   hubot learn <factoid> =~ s/expression/replace/gi - edit a factoid
-#   hubot alias <factoid> = <factoid>
-#   hubot forget <factoid> - forget a factoid
-#   hubot remember <factoid> - remember a factoid
-#   hubot drop <factoid> - permanently forget a factoid
-#   hubot factoids - get a link to the raw factoid data
-#   hubot list all factoids - list all factoids
-#   hubot search <substring> - list factoids which match (by factoid key or result)
+#   hubot factoid learn <factoid> = <details> - learn a new factoid
+#   hubot factoid learn <factoid> =~ s/expression/replace/gi - edit a factoid
+#   hubot factoid alias <factoid> = <factoid>
+#   hubot factoid forget <factoid> - forget a factoid
+#   hubot factoid remember <factoid> - remember a factoid
+#   hubot factoid drop <factoid> - permanently forget a factoid
+#   hubot factoid(s) - get a link to the raw factoid data
+#   hubot factoid list( all factoids) - list all factoids
+#   hubot factoid search <substring> - list factoids which match (by factoid key or result)
 #   !<factoid> - play back a factoid
 #
 # Author:
@@ -52,14 +52,14 @@ module.exports = (robot) ->
       fact.popularity++
       msg.send "#{fact.value}"
 
-  robot.respond /learn (.{3,}) = ([^@].+)/i, (msg) =>
+  robot.respond /factoid learn (.{3,}) = ([^@].+)/i, (msg) =>
     [key, value] = [msg.match[1], msg.match[2]]
     factoid = @factoids.set key, value, msg.message.user.name
 
     if factoid.value?
       msg.reply "OK, #{key} is now #{factoid.value}"
 
-  robot.respond /learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) =>
+  robot.respond /factoid learn (.{3,}) =~ s\/(.+)\/(.+)\/(.*)/i, (msg) =>
     key = msg.match[1]
     re = new RegExp(msg.match[2], msg.match[4])
     fact = @factoids.get key
@@ -72,20 +72,20 @@ module.exports = (robot) ->
     else
       msg.reply 'Not a factoid'
 
-  robot.respond /forget (.{3,})/i, (msg) =>
+  robot.respond /factoid forget (.{3,})/i, (msg) =>
     if @factoids.forget msg.match[1]
       msg.reply "OK, forgot #{msg.match[1]}"
     else
       msg.reply 'Not a factoid'
 
-  robot.respond /remember (.{3,})/i, (msg) =>
+  robot.respond /factoid remember (.{3,})/i, (msg) =>
     factoid = @factoids.remember msg.match[1]
     if factoid? and not factoid.forgotten
       msg.reply "OK, #{msg.match[1]} is #{factoid.value}"
     else
       msg.reply 'Not a factoid'
 
-  robot.respond /list all factoids/i, (msg) =>
+  robot.respond /factoid list( all)?( factoids)?/i, (msg) =>
     all = @factoids.getAll()
     out = ''
 
@@ -96,11 +96,11 @@ module.exports = (robot) ->
         out += prefix + f + ': ' + all[f] + "\n"
       msg.reply "All factoids: \n" + out
 
-  robot.respond /factoids?/i, (msg) =>
+  robot.respond /factoids?$/i, (msg) =>
     url = process.env.HUBOT_BASE_URL or "http://not-yet-set/"
     msg.reply "#{url.replace /\/$/, ''}/#{robot.name}/factoids"
 
-  robot.respond /search (.{3,})/i, (msg) =>
+  robot.respond /factoid search (.{3,})/i, (msg) =>
     factoids = @factoids.search msg.match[1]
 
     if factoids.length > 0
@@ -109,13 +109,13 @@ module.exports = (robot) ->
     else
       msg.reply 'No factoids matched'
 
-  robot.respond /alias (.{3,}) = (.{3,})/i, (msg) =>
+  robot.respond /factoid alias (.{3,}) = (.{3,})/i, (msg) =>
     who = msg.message.user.name
     alias = msg.match[1]
     target = msg.match[2]
     msg.reply "OK, aliased #{alias} to #{target}" if @factoids.set msg.match[1], "@#{msg.match[2]}", msg.message.user.name, false
 
-  robot.respond /drop (.{3,})/i, (msg) =>
+  robot.respond /factoid drop (.{3,})/i, (msg) =>
     user = msg.envelope.user
     isAdmin = robot.auth?.hasRole(user, 'factoids-admin') or robot.auth?.hasRole(user, 'admin')
     if isAdmin or not robot.auth?
